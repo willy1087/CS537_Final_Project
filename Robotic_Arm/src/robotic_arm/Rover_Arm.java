@@ -1,17 +1,9 @@
-
 package robotic_arm;
+
 //make it a thread
 public class Rover_Arm {
 
-	//in meters
-	public static final double ARM_LENGTH_SHOULDER_ARM = 1.1;
-	public static final double ARM_LENGTH_ARM_WRIST = 1.1;
-	public static final double MINIMUM_JOINT_Z_HEIGHT = 1;
-
-	//in cm
-	public static final double TURRET_WIDE_LENGHT = 0.60;
-	
-
+	public static final long POWER = 110;
 	//define variables
 	boolean ARM_ON =false;
 	
@@ -19,64 +11,188 @@ public class Rover_Arm {
 	//initial variables shoulder from given x, y, and z
 	private double initial_x,initial_y,initial_z;
 	
-	//joint x,y,z
-	private double joint_x,joint_y,joint_z;
 	
-	//wrist x,y,z
-	private double wrist_x,wrist_y,wrist_z;
+	//instrument
+	private String instrument;
 	
 	//angles
-	private double shoulder_arm_angle_theta1;
-	private double arm_wrist_angle_theta2;
-		
+	private int shoulder_arm_angle_theta1;
+	private int arm_wrist_angle_theta2;
+	
+	//degrees of freedom
+	private int degree_1;
+	private int degree_2;
+	private int degree_3;
+	private int degree_4;
+	private int degree_5;
+	
+	//power
+	private long power;
+	//time
+	private long time;
+	
 	//constructor
 	
 	public Rover_Arm(){
 		
 	}
 	
-	public Rover_Arm(double initial_x, double initial_y, double initial_z){
-		this.initial_x = initial_x;
-		this.initial_y = initial_y;
-		this.initial_z = initial_z;
+	public Rover_Arm(String instrument,int angle1,int angle2, int degree_1, int degree_2, int degree_3, 
+			int degree_4 , int degree_5, long time, long power ){
+		
+		//continue at home
+		this.instrument = instrument;
+		this.shoulder_arm_angle_theta1 = angle1;
+		this.arm_wrist_angle_theta2 = angle2;
+		this.degree_1 = degree_1;
+		this.degree_2 = degree_2;
+		this.degree_3 = degree_3;
+		this.degree_4 = degree_4;
+		this.degree_5 = degree_5;
+		this.time = time;
+		this.power = power;
 	}
 	
+	
+
 	
 	//methods
+		
+	public Rover_Arm move(int instru, int theta1, int theta2, int deg_1,int deg_2,int deg_3, int deg_4, int deg_5){
+		
+		//store in a constructor for JSON purposes ?? i think so
+		
+		//check theta1
+		int angle1 = theta1;
+		//check theta2
+		int angle2 = theta2;
+		
+		//select the instrument
+		String instrument = "";
+		switch(instru){
+			case 1: instrument = "DRT";
+			break;
+			case 2: instrument = "MAHLI";
+			break;
+			case 3: instrument = "Drill";
+			break;
+			case 4: instrument = "APXS";
+			break;
+			case 5: instrument = "CHIMRA";
+			break;
+		}
+		
+		int degree_1 = deg_1;
+		int degree_2 = deg_2;
+		int degree_3 = deg_3;
+		int degree_4 = deg_4;
+		int degree_5 = deg_5;
+		
+		//power
+		long power_watts = POWER;
+		
+		//time
+		long move_time;
+		if(degree_1 == 1){
+			move_time = ARM_MOVEMENT_TIME(1000);
+		}else if (degree_2 == 1){
+			move_time = ARM_MOVEMENT_TIME(2000);
+		}else if (degree_3 == 1){
+			move_time = ARM_MOVEMENT_TIME(3000);
+		}else if (degree_4 == 1){
+			move_time = ARM_MOVEMENT_TIME(4000);
+		}else{
+			move_time = ARM_MOVEMENT_TIME(5000);
+		}
+				
+		//set constructor
+		Rover_Arm d = new Rover_Arm(instrument,angle1,angle2,degree_1,degree_2,degree_3,degree_4,degree_5,
+				move_time,power_watts);
+		
+		d.setARM_ON(true);
+		
+		return d;
+	}
 	
-	public Rover_Arm newPosition(double wrist_y, double wrist_z,double joint_y,double joint_z ,double tetha1,double tetha2){
+	public long ARM_MOVEMENT_TIME(int deg){
 		
+		long currentTime = System.currentTimeMillis()/1000;
+				
+		//issue delay
+		try {
+			Thread.sleep((int)(Math.random()*(10000 - deg)) + deg);                
+		} catch(InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+				
+		long latterTime = System.currentTimeMillis()/1000;
+		long arm_move_time = latterTime - currentTime;
+				
+		return arm_move_time;
+	}
+	
+	public String ARM_STATUS(){
 		
-		//setting angle tetha1
-		this.setShoulder_arm_angle_theta1(tetha1);
+		if (isARM_ON() == false){
+			return "OFF";
+		}else{
+			return "ON";
+		}
+	}
+	
+	public long ARM_PWR_ON(){
+	
+		//output it requires 10 seconds to turn on
+		long currentTime = System.currentTimeMillis()/1000;
 		
+		//issue delay
+		try {
+		    Thread.sleep(10000);                
+		} catch(InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		}
 		
-		//setting the joints
+		long latterTime = System.currentTimeMillis()/1000;
+		long arm_boot_time = latterTime - currentTime;
 		
-		//set joint x
-		this.setJoint_x(this.getInitial_x()+ ARM_LENGTH_SHOULDER_ARM);
-		//set joint y
-		this.setJoint_y(joint_y);
-		//set joint z
-		this.setJoint_z(joint_z);
+		//set On to true;
+		setARM_ON(true);
 		
+		return arm_boot_time;
+	}
+	
+
+	public long ARM_PWR_OFF(){
 		
-		//setting angle tethat2
-		this.setArm_wrist_angle_theta2(tetha2);
+		//output it requires 10 seconds to turn on
+		long currentTime = System.currentTimeMillis()/1000;
+				
+		//issue delay
+		try {
+			Thread.sleep(5000);                
+		} catch(InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+				
+		long latterTime = System.currentTimeMillis()/1000;
+		long arm_off_time = latterTime - currentTime;
 		
-		//setting the wrists
+		//set On to false;
+		setARM_ON(false);
 		
-		//set wrist x
-		this.setWrist_x(this.getJoint_x()+ ARM_LENGTH_ARM_WRIST);
-		//set wrist y
-		this.setWrist_y(wrist_y);
-		//set wrist z
-		this.setWrist_z(wrist_z);
+		return arm_off_time;	
+	}
+	
+	public long ARM_POWER_VALUE(){
 		
-		return this;
+		long power = POWER;
 		
+		return power;
 		
 	}
+	
+	
+
 	
 	//one of the constraints... check if movement of the arm is allowed
 	public boolean can_it_move(double wrist_y, double wrist_z,double joint_y,double joint_z ,double tetha1,double tetha2,
@@ -93,12 +209,7 @@ public class Rover_Arm {
 				//if the position of the wrist is less than 60 cm from the ground
 				if(!(wrist_z < 0.60)){
 					
-					//if joint z is greater than the shoulder position + ARM_LENGTH_SHOULDER_ARM
-					if(!(joint_z > this.getInitial_z() + ARM_LENGTH_SHOULDER_ARM )){
-			
-						//if joint z is lower than the minimum height then it cannot move
-						if(!(joint_z < MINIMUM_JOINT_Z_HEIGHT)){
-						//if angle tetha1 is greater than 70 degrees (might hit ground) 
+					
 						
 							if(!(tetha1 > 70)){
 								
@@ -109,8 +220,7 @@ public class Rover_Arm {
 									if(!(tetha2 > 290)){
 										can_it = true;
 									}
-								}
-							}
+							
 						}
 					}
 				}
@@ -121,62 +231,7 @@ public class Rover_Arm {
 		return can_it;
 	}
 	
-	public Rover_Arm Position(Rover_Arm one,Rover_Arm two, boolean ARM_ON){
-		
-		double actual_X = (one.getInitial_x() + two.getInitial_x())/2;
-		double actual_Y = (one.getInitial_y() + two.getInitial_y())/2;
-		double actual_Z = (one.getInitial_z() + two.getInitial_z())/2;
-		
-		
-		this.setInitial_x(actual_X);
-		this.setInitial_y(actual_Y);
-		this.setInitial_z(actual_Z);
-		
-		
-		//if the arm is on
-		if(ARM_ON){
-			//angles in degrees
-			double tetha1 = 1;
-			double tetha2 = 10; 
-		
-			//start at this angle
-			this.setArm_wrist_angle_theta2(tetha1);
-			this.setShoulder_arm_angle_theta1(tetha2);
-			
-			//default joint values
-			this.setJoint_x(actual_X - ARM_LENGTH_SHOULDER_ARM );
-			this.setJoint_y(actual_Y);
-			this.setJoint_z(actual_Z);
-			
-			//default wrist location
-			this.setWrist_x(actual_X);
-			this.setWrist_y(actual_Y);
-			this.setWrist_z(actual_Z + TURRET_WIDE_LENGHT);
-			
-			
-		//if arm is off	
-		}else{
-			
-			//setting the angle to default
-			this.setArm_wrist_angle_theta2(10);
-			this.setShoulder_arm_angle_theta1(0);
-			
-			//default joint values
-			this.setJoint_x(actual_X - ARM_LENGTH_SHOULDER_ARM );
-			this.setJoint_y(actual_Y);
-			this.setJoint_z(actual_Z);
-			
-			//default wrist location
-			this.setWrist_x(actual_X);
-			this.setWrist_y(actual_Y);
-			this.setWrist_z(actual_Z + TURRET_WIDE_LENGHT);
-			
-		}
-		//set the arm and wrist
-		
-		return this;
-	}
-
+	
 
 	//setters and getters
 	public double getInitial_x() {
@@ -208,70 +263,94 @@ public class Rover_Arm {
 		this.initial_z = initial_z;
 	}
 
-	public double getShoulder_arm_angle_theta1() {
+	public int getShoulder_arm_angle_theta1() {
 		return shoulder_arm_angle_theta1;
 	}
 
-	public void setShoulder_arm_angle_theta1(double shoulder_arm_angle_theta1) {
+	public void setShoulder_arm_angle_theta1(int shoulder_arm_angle_theta1) {
 		this.shoulder_arm_angle_theta1 = shoulder_arm_angle_theta1;
 	}
 
-	public double getArm_wrist_angle_theta2() {
+	public int getArm_wrist_angle_theta2() {
 		return arm_wrist_angle_theta2;
 	}
 
-	public void setArm_wrist_angle_theta2(double arm_wrist_angle_theta2) {
+	public void setArm_wrist_angle_theta2(int arm_wrist_angle_theta2) {
 		this.arm_wrist_angle_theta2 = arm_wrist_angle_theta2;
 	}
 
-	public double getJoint_x() {
-		return joint_x;
+	public boolean isARM_ON() {
+		return ARM_ON;
 	}
 
-	public void setJoint_x(double joint_x) {
-		this.joint_x = joint_x;
+	public void setARM_ON(boolean aRM_ON) {
+		ARM_ON = aRM_ON;
 	}
 
-	public double getJoint_y() {
-		return joint_y;
+	public String getInstrument() {
+		return instrument;
 	}
 
-	public void setJoint_y(double joint_y) {
-		this.joint_y = joint_y;
+	public void setInstrument(String instrument) {
+		this.instrument = instrument;
 	}
 
-	public double getJoint_z() {
-		return joint_z;
+	public int getDegree_1() {
+		return degree_1;
 	}
 
-	public void setJoint_z(double joint_z) {
-		this.joint_z = joint_z;
+	public void setDegree_1(int degree_1) {
+		this.degree_1 = degree_1;
 	}
 
-	public double getWrist_x() {
-		return wrist_x;
+	public int getDegree_2() {
+		return degree_2;
 	}
 
-	public void setWrist_x(double wrist_x) {
-		this.wrist_x = wrist_x;
+	public void setDegree_2(int degree_2) {
+		this.degree_2 = degree_2;
 	}
 
-	public double getWrist_y() {
-		return wrist_y;
+	public int getDegree_3() {
+		return degree_3;
 	}
 
-	public void setWrist_y(double wrist_y) {
-		this.wrist_y = wrist_y;
+	public void setDegree_3(int degree_3) {
+		this.degree_3 = degree_3;
 	}
 
-	public double getWrist_z() {
-		return wrist_z;
+	public int getDegree_4() {
+		return degree_4;
 	}
 
-	public void setWrist_z(double wrist_z) {
-		this.wrist_z = wrist_z;
+	public void setDegree_4(int degree_4) {
+		this.degree_4 = degree_4;
 	}
-	
+
+	public int getDegree_5() {
+		return degree_5;
+	}
+
+	public void setDegree_5(int degree_5) {
+		this.degree_5 = degree_5;
+	}
+
+	public long getPower() {
+		return power;
+	}
+
+	public void setPower(long power) {
+		this.power = power;
+	}
+
+	public long getTime() {
+		return time;
+	}
+
+	public void setTime(long time) {
+		this.time = time;
+	}
+
 	
 	
 }
