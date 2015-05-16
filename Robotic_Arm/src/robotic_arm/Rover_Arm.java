@@ -7,11 +7,6 @@ public class Rover_Arm {
 	//define variables
 	boolean ARM_ON =false;
 	
-	
-	//initial variables shoulder from given x, y, and z
-	private double initial_x,initial_y,initial_z;
-	
-	
 	//instrument
 	private String instrument;
 	
@@ -131,6 +126,48 @@ public class Rover_Arm {
 		return arm_move_time;
 	}
 	
+	public String INST_STATUS(){
+		
+		String int_status = "OFF";
+		int [] instruments = {this.getDegree_1(), this.getDegree_2(),this.getDegree_3(),this.getDegree_4(),this.getDegree_5()}; 
+	
+		for(int i = 0; i < instruments.length; i++){
+			
+			if(instruments[i] == 1)
+				int_status = "ON";
+		}
+		
+		return int_status;
+	}
+	
+	public String INST_IN_USE(){
+		
+		String instrument = "No Instrument in USE";
+		int [] instruments = {this.getDegree_1(), this.getDegree_2(),this.getDegree_3(),this.getDegree_4(),this.getDegree_5()}; 
+		
+		for(int i = 0; i < instruments.length; i++){
+			
+			if(instruments[i] == 1)
+			{
+				switch(i){
+					case 0: instrument = "DRT";
+						break;
+					case 1: instrument = "MAHLI";
+						break;
+					case 2: instrument = "Drill";
+						break;
+					case 3: instrument = "APXS";
+						break;
+					case 4: instrument = "CHIMRA";
+						break;
+				}
+			}
+		}
+		
+		
+		return instrument;
+	}
+	
 	public String ARM_STATUS(){
 		
 		if (isARM_ON() == false){
@@ -140,8 +177,17 @@ public class Rover_Arm {
 		}
 	}
 	
-	public long ARM_PWR_ON(){
+	public void turn_off_instruments(){
+		
+		this.setDegree_1(0);
+		this.setDegree_2(0);
+		this.setDegree_3(0);
+		this.setDegree_4(0);
+		this.setDegree_5(0);
+	}
 	
+	public long ARM_PWR_ON(){
+		
 		//output it requires 10 seconds to turn on
 		long currentTime = System.currentTimeMillis()/1000;
 		
@@ -164,6 +210,10 @@ public class Rover_Arm {
 
 	public long ARM_PWR_OFF(){
 		
+		
+		//set instruments off
+		turn_off_instruments();
+		
 		//output it requires 10 seconds to turn on
 		long currentTime = System.currentTimeMillis()/1000;
 				
@@ -183,6 +233,39 @@ public class Rover_Arm {
 		return arm_off_time;	
 	}
 	
+	
+	public long ARM_PWR_STOW(){
+		
+		//stowing time less than turn off
+		long time = 2;
+		//
+		//issue delay
+		try {
+			Thread.sleep(5000);                
+		} catch(InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+		
+		//set to stow values
+		setArm_stow(time);
+		
+		return time;
+	}
+	
+	public void setArm_stow(long time){
+		
+		this.setInstrument("ARM_PWR_STOW");
+		this.setShoulder_arm_angle_theta1(20);
+		this.setArm_wrist_angle_theta2(10);
+		this.setDegree_1(0);
+		this.setDegree_2(0);
+		this.setDegree_3(0);
+		this.setDegree_4(0);
+		this.setDegree_5(0);
+		this.setPower(ARM_POWER_VALUE());
+		this.setTime(time);
+	}
+	
 	public long ARM_POWER_VALUE(){
 		
 		long power = POWER;
@@ -195,8 +278,7 @@ public class Rover_Arm {
 
 	
 	//one of the constraints... check if movement of the arm is allowed
-	public boolean can_it_move(double wrist_y, double wrist_z,double joint_y,double joint_z ,double tetha1,double tetha2,
-			boolean camera_ON,double temperature){
+	public boolean can_it_move(double tetha1,double tetha2,boolean camera_ON,double temperature){
 		
 		boolean can_it = false;
 		
@@ -205,12 +287,6 @@ public class Rover_Arm {
 			
 			//check if the temperature is good enough to move the arm
 			if(temperature > -110 && temperature < 50){
-			
-				//if the position of the wrist is less than 60 cm from the ground
-				if(!(wrist_z < 0.60)){
-					
-					
-						
 							if(!(tetha1 > 70)){
 								
 								//or tetha1 is less than 45 degree (might hit rover)
@@ -222,7 +298,6 @@ public class Rover_Arm {
 									}
 							
 						}
-					}
 				}
 			}
 
@@ -234,34 +309,6 @@ public class Rover_Arm {
 	
 
 	//setters and getters
-	public double getInitial_x() {
-		return initial_x;
-	}
-
-
-	public void setInitial_x(double initial_x) {
-		this.initial_x = initial_x;
-	}
-
-
-	public double getInitial_y() {
-		return initial_y;
-	}
-
-
-	public void setInitial_y(double initial_y) {
-		this.initial_y = initial_y;
-	}
-
-
-	public double getInitial_z() {
-		return initial_z;
-	}
-
-
-	public void setInitial_z(double initial_z) {
-		this.initial_z = initial_z;
-	}
 
 	public int getShoulder_arm_angle_theta1() {
 		return shoulder_arm_angle_theta1;

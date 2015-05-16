@@ -1,16 +1,13 @@
 {
   "ARM_ON": true,
-  "initial_x": 0.0,
-  "initial_y": 0.0,
-  "initial_z": 0.0,
-  "instrument": "APXS",
-  "shoulder_arm_angle_theta1": 26,
-  "arm_wrist_angle_theta2": 28,
+  "instrument": "ARM_PWR_STOW",
+  "shoulder_arm_angle_theta1": 20,
+  "arm_wrist_angle_theta2": 10,
   "degree_1": 0,
   "degree_2": 0,
   "degree_3": 0,
-  "degree_4": 1,
+  "degree_4": 0,
   "degree_5": 0,
   "power": 110,
-  "time": 7
+  "time": 2
 }

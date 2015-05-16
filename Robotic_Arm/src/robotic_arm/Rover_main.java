@@ -22,10 +22,13 @@ public class Rover_main {
 			System.out.println("What do you want to do");
 			System.out.println("1. ARM_PWR_ON");
 			System.out.println("2. ARM_PWR_OFF");
-			System.out.println("3. Instrument choices");
+			System.out.println("3. INTST_MOVE_choices");
 			System.out.println("4. ARM_POWER");
 			System.out.println("5. ARM_STATUS");
-			System.out.println("6. EXIT");
+			System.out.println("6. INST_STATUS");
+			System.out.println("7. INST_IN_USE");
+			System.out.println("8. ARM_PWR_STOW");
+			System.out.println("9. EXIT");
 			
 
 			choice = in.nextInt();
@@ -156,11 +159,66 @@ public class Rover_main {
 				
 				System.out.println("The Arm is currently: " + test.ARM_STATUS());
 			}
+			else if (choice == 6){
+				
+				System.out.println("The instrument is currently: " + test.INST_STATUS());
+			}
+			else if (choice == 7){
+				
+				System.out.println("Name of instrument in use: " + test.INST_IN_USE());
+			}
+			else if (choice == 8){
+				
+				if(test.ARM_STATUS() == "OFF"){
+					System.out.println("The arm is off");
+				}else{
+					System.out.println("The Arm got stowed for " + test.ARM_PWR_STOW() + " seconds");
+					System.out.println("command : " + test.getInstrument() + "_" + test.getShoulder_arm_angle_theta1() +
+							"_" + test.getArm_wrist_angle_theta2() + "_" + test.getDegree_1() + "_" + test.getDegree_2() +
+							"_" + test.getDegree_3() + "_" + test.getDegree_4() + "_" + test.getDegree_5() + " Successful");
+					
+					
+					//json code
+					String myFilePath = "C:\\Users\\willy1087\\Documents\\Robotic_Arm\\ARM_COMMAND.json";
+					
+					// Gson is used to create a json object that is spaced nicely
+					Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+					// Instantiate the writer since we're writing to a JSON file.
+					FileWriter writer = null;
+					try {
+						writer = new FileWriter(myFilePath);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+					// Object is converted to a JSON String
+					String jsonString = gson.toJson(test);
+					
+					// Write the file
+					try {
+						writer.write(jsonString);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+					// Close the Writer
+					try {
+						writer.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
+					//end of json code
+					
+					
+				}
+			}
 			
 			
 			System.out.println();
 			
-		}while(choice != 6);
+		}while(choice != 9);
 		
 		in.close();
 		
